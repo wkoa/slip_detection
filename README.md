@@ -7,5 +7,5 @@ Paper url: https://arxiv.org/abs/1802.10153
 * torchvision >= 0.2.2
 * tensorboardX
 # To do
-* Verify GPU
-* 
+* ~~Verify GPU~~
+* Multi data input
