@@ -1,17 +1,14 @@
 import numpy as np
 
 import torch
-from torch import optim
-from torch import nn
 from torch.utils.data.dataloader import DataLoader
-
-from tensorboardX import SummaryWriter
 
 from libs.models import network
 from libs.utils import data_loader
-from libs.utils.logger import Logger
+
 
 params = {}
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def test_net(params):
     # Create network
@@ -37,10 +34,12 @@ def test_net(params):
     with torch.no_grad():
         correct = 0
         total = 0
-        for rgb_imgs, tacitle_imgs, labels in test_data_loader:
-            outputs = slip_detection_model(rgb_imgs, tacitle_imgs)
+        for rgb_imgs, tactile_imgs, labels in test_data_loader:
+            outputs = slip_detection_model(rgb_imgs, tactile_imgs)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
+            if params['use_gpu']:
+                labels = labels.cuda()
             correct += (predicted == labels).sum().item()
         print('Test Accuracy of the model on the {} test images: {} %'.format(total, 100 * correct / total))
 

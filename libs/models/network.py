@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 from torchvision.models import vgg19_bn, vgg16_bn, inception_v3, alexnet
-
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class Basic_network(nn.Module):
     def __init__(self, base_network='vgg_16', pretrained=False,):
         super(Basic_network, self).__init__()
@@ -59,8 +59,8 @@ class RNN_network(nn.Module):
     def forward(self, x):
         # Set initial hidden and cell states
         if self.use_gpu:
-            h0 = torch.zeros(self.num_layers, len(x), self.hidden_size).cuda()
-            c0 = torch.zeros(self.num_layers, len(x), self.hidden_size).cuda()
+            h0 = torch.zeros(self.num_layers, len(x), self.hidden_size).to(device)
+            c0 = torch.zeros(self.num_layers, len(x), self.hidden_size).to(device)
         else:
             h0 = torch.zeros(self.num_layers, len(x), self.hidden_size)
             c0 = torch.zeros(self.num_layers, len(x), self.hidden_size)
@@ -87,19 +87,19 @@ class Slip_detection_network(nn.Module):
     def forward(self, x_1, x_2):
         """
         :param x_1: a list of 8 rgb imgs(tensor)
-        :param x_2: a list of 8 tacitle imgs(tensor)
+        :param x_2: a list of 8 tactile imgs(tensor)
         :return: network output
         """
         cnn_features = []
         for i in range(8):
             if self.use_gpu:
-                features = self.cnn_network(x_1[i].cuda(), x_2[i].cuda())
+                features = self.cnn_network(x_1[i].to(device), x_2[i].to(device))
             else:
                 features = self.cnn_network(x_1[i], x_2[i])
             cnn_features.append(features.tolist())
         cnn_features = torch.FloatTensor(cnn_features)
         if self.use_gpu:
-            cnn_features = cnn_features.cuda()
+            cnn_features = cnn_features.to(device)
 
         output = self.rnn_network(cnn_features)
 

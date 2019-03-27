@@ -11,7 +11,7 @@ from libs.models import network
 from libs.utils import data_loader
 
 params = {}
-
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def train_net(params):
 
@@ -57,8 +57,10 @@ def train_net(params):
         total = 0.0
         for i, data in enumerate(train_data_loader):
             # one iteration
-            rgb_imgs, tacitle_imgs, label = data
-            output = slip_detection_model(rgb_imgs, tacitle_imgs)
+            rgb_imgs, tactile_imgs, label = data
+            output = slip_detection_model(rgb_imgs, tactile_imgs)
+            if params['use_gpu']:
+                label = label.cuda()
             loss = loss_function(output, label)
 
             # Backward & optimize
@@ -83,10 +85,12 @@ def train_net(params):
             with torch.no_grad():
                 correct = 0
                 total = 0
-                for rgb_imgs, tacitle_imgs, labels in test_data_loader:
-                    outputs = slip_detection_model(rgb_imgs, tacitle_imgs)
+                for rgb_imgs, tactile_imgs, labels in test_data_loader:
+                    outputs = slip_detection_model(rgb_imgs, tactile_imgs)
                     _, predicted = torch.max(outputs.data, 1)
                     total += labels.size(0)
+                    if params['use_gpu']:
+                        labels = labels.cuda()
                     correct += (predicted == labels).sum().item()
                 print('Test Accuracy of the model on the {} test images: {} %'.format(total, 100 * correct / total))
         # Save 5 different model
@@ -127,6 +131,7 @@ if __name__ == '__main__':
 
     params['save_dir'] = 'model'
     # Start train
+    print(torch.cuda.is_available())
     train_net(params)
 
 
