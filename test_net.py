@@ -27,7 +27,7 @@ def test_net(params):
     net_params_state_dict = torch.load(params['net_params'])
     slip_detection_model.load_state_dict(net_params_state_dict)
 
-    test_dataset = data_loader.Tacile_Vision_dataset(data_path=params['test_data_dir'])
+    test_dataset = data_loader.Tactile_Vision_dataset(data_path=params['test_data_dir'])
     test_data_loader = DataLoader(test_dataset, batch_size=params['batch_size'], shuffle=True,
                                   num_workers=params['num_workers'])
 

@@ -5,7 +5,7 @@ import cv2
 import torch
 from torch.utils import data
 
-class Tacile_Vision_dataset(data.Dataset):
+class Tactile_Vision_dataset(data.Dataset):
     def __init__(self, data_path='./data'):
         self.data_path = data_path
         self.label_files = []

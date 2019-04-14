@@ -13,10 +13,11 @@ from libs.utils import data_loader
 params = {}
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
+
 def train_net(params):
 
     writer = SummaryWriter(log_dir='logs')
-    dummy_input = [torch.zeros(1,3,480,640) for i in range(8)]
+    # dummy_input = [torch.zeros(1,3,480,640) for i in range(8)]
     # Create network
     slip_detection_model = network.Slip_detection_network(base_network=params['cnn'], pretrained=params['pretrained'],
                                                           rnn_input_size=params['rnn_input_size'],
@@ -40,10 +41,10 @@ def train_net(params):
     loss_function = nn.CrossEntropyLoss()
 
     # Dataloader
-    train_dataset = data_loader.Tacile_Vision_dataset(data_path=params['train_data_dir'])
+    train_dataset = data_loader.Tactile_Vision_dataset(data_path=params['train_data_dir'])
     train_data_loader = DataLoader(train_dataset, batch_size=params['batch_size'], shuffle=True,
                                    num_workers=params['num_workers'])
-    test_dataset = data_loader.Tacile_Vision_dataset(data_path=params['test_data_dir'])
+    test_dataset = data_loader.Tactile_Vision_dataset(data_path=params['test_data_dir'])
     test_data_loader = DataLoader(test_dataset, batch_size=1, shuffle=True, num_workers=params['num_workers'])
     # To record training procession
     train_loss = []
@@ -111,14 +112,15 @@ if __name__ == '__main__':
     params['rnn_hidden_size'] = 64
     params['num_classes'] = 2
     params['num_layers'] = 1
-
+    params['use_gpu'] = False
+    if torch.cuda.is_available():
+        params['use_gpu'] = True
     # Customer params setting.
     params['epochs'] = 10
     params['print_interval'] = 5
     params['test_interval'] = 10
     params['batch_size'] = 2
     params['num_workers'] = 1
-    params['use_gpu'] = False
     params['lr'] = 1e-5
     params['dropout'] = 0.8
     params['train_data_dir'] = 'data'
@@ -126,12 +128,9 @@ if __name__ == '__main__':
     # Use Alextnet to debug.
     # You can choose vgg_16, vgg_19 or inception_v3(unreliable). Poor MBP
     params['cnn'] = 'debug'
-    params['pretrained'] = False # CNN is pretrained by ImageNet or not
+    params['pretrained'] = True # CNN is pretrained by ImageNet or not
     # params['net_params'] = 'model/pretrained_net/'
 
     params['save_dir'] = 'model'
     # Start train
-    print(torch.cuda.is_available())
     train_net(params)
-
-

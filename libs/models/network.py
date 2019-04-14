@@ -2,12 +2,12 @@ import torch
 from torch import nn
 from torchvision.models import vgg19_bn, vgg16_bn, inception_v3, alexnet
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 class Basic_network(nn.Module):
     def __init__(self, base_network='vgg_16', pretrained=False,):
         super(Basic_network, self).__init__()
         # Define CNN to extract features.
         self.features = None
-        self.base_network = base_network
         if base_network == 'vgg_16':
             self.features = vgg16_bn(pretrained=pretrained)
             # To delete fc8
@@ -100,10 +100,11 @@ class Slip_detection_network(nn.Module):
         cnn_features = torch.FloatTensor(cnn_features)
         if self.use_gpu:
             cnn_features = cnn_features.to(device)
-
+        cnn_features = cnn_features.reshape([-1, 8, 64])
         output = self.rnn_network(cnn_features)
 
         return output
+
 
 if __name__ == "__main__":
     network = Slip_detection_network()
