@@ -8,4 +8,4 @@ Paper url: https://arxiv.org/abs/1802.10153
 * tensorboardX
 # To do
 * ~~Verify GPU~~
-* Multi data input
+* ~~Multi data input~~
