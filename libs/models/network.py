@@ -71,7 +71,7 @@ class RNN_network(nn.Module):
         out, _ = self.lstm_2(x, (h0, c0))
         out = self.dropout_2(out)
         # Decode the hidden state of the last time step
-        out = self.fc(out[-1, :, :])
+        out = self.fc(out[:, -1, :])
         return out
 
 
