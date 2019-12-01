@@ -9,3 +9,4 @@ Paper url: https://arxiv.org/abs/1802.10153
 # To do
 * ~~Verify GPU~~
 * ~~Multi data input~~
+* Check bugs
