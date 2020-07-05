@@ -45,16 +45,18 @@ class Basic_network(nn.Module):
 
 # RNN Classifier
 class RNN_network(nn.Module):
-    def __init__(self, input_size=64, hidden_size=64, num_layers=1, num_classes=2, use_gpu=False, dropout=0.8):
+    def __init__(self, input_size=64, hidden_size=64, num_layers=2, num_classes=2, use_gpu=False, dropout=0.8):
         super(RNN_network, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         self.use_gpu = use_gpu
-        self.lstm_1 = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True,)
-        self.lstm_2 = nn.LSTM(hidden_size, hidden_size, num_layers, batch_first=True,)
+        self.lstm_1 = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True, dropout=dropout)
+        # self.lstm_2 = nn.LSTM(hidden_size, hidden_size, num_layers, batch_first=True,)
         self.fc = nn.Linear(hidden_size, num_classes)
         self.dropout_1 = nn.Dropout(dropout)
         self.dropout_2 = nn.Dropout(dropout)
+        self.h0 = None
+        self.c0 = None
 
     def forward(self, x):
         # Set initial hidden and cell states
@@ -67,9 +69,9 @@ class RNN_network(nn.Module):
 
         # Forward propagate LSTM
         x, _ = self.lstm_1(x, (h0, c0))  # out: tensor of shape (batch_size, seq_length, hidden_size)
-        x = self.dropout_1(x)
-        out, _ = self.lstm_2(x, (h0, c0))
-        out = self.dropout_2(out)
+        out = self.dropout_1(x)
+        # out, _ = self.lstm_2(x, (h0, c0))
+        # out = self.dropout_2(out)
         # Decode the hidden state of the last time step
         out = self.fc(out[:, -1, :])
         return out
@@ -79,7 +81,7 @@ class Slip_detection_network(nn.Module):
     def __init__(self, base_network='vgg_16', pretrained=False, rnn_input_size=64, rnn_hidden_size=64,
                  rnn_num_layers=1, num_classes=2, use_gpu=False, dropout=0.8):
         super(Slip_detection_network, self).__init__()
-        self.cnn_network = Basic_network(base_network=base_network,pretrained=pretrained)
+        self.cnn_network = Basic_network(base_network=base_network, pretrained=pretrained)
         self.rnn_network = RNN_network(input_size=rnn_input_size, hidden_size=rnn_hidden_size, num_layers=rnn_num_layers,
                                        num_classes=num_classes, use_gpu=use_gpu, dropout=dropout)
         self.use_gpu = use_gpu
@@ -90,7 +92,7 @@ class Slip_detection_network(nn.Module):
         :param x_2: a list of 8 tactile imgs(tensor)
         :return: network output
         """
-        cnn_features = []
+        cnn_features = nn.ModuleList()
         for i in range(8):
             if self.use_gpu:
                 features = self.cnn_network(x_1[i].to(device), x_2[i].to(device))

@@ -1,5 +1,3 @@
-import numpy as np
-
 import torch
 from torch.utils.data.dataloader import DataLoader
 
@@ -9,6 +7,7 @@ from libs.utils import data_loader
 
 params = {}
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 
 def test_net(params):
     # Create network
