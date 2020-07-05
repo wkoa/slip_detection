@@ -92,17 +92,20 @@ class Slip_detection_network(nn.Module):
         :param x_2: a list of 8 tactile imgs(tensor)
         :return: network output
         """
-        cnn_features = nn.ModuleList()
         for i in range(8):
             if self.use_gpu:
                 features = self.cnn_network(x_1[i].to(device), x_2[i].to(device))
             else:
                 features = self.cnn_network(x_1[i], x_2[i])
-            cnn_features.append(features.tolist())
-        cnn_features = torch.FloatTensor(cnn_features)
-        if self.use_gpu:
-            cnn_features = cnn_features.to(device)
-        cnn_features = cnn_features.reshape([-1, 8, 64])
+
+            if i == 0:
+                cnn_features = features.unsqueeze(1)
+            else:
+                cnn_features = torch.cat([cnn_features, features.unsqueeze(1)], dim=1)
+        # cnn_features = torch.FloatTensor(cnn_features)
+        # if self.use_gpu:
+        #     cnn_features = cnn_features.to(device)
+        # cnn_features = cnn_features.reshape([-1, 8, 64])
         output = self.rnn_network(cnn_features)
 
         return output
